@@ -1,0 +1,313 @@
+---
+title: "Bank of England Data Vis Competition - EDA"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Aim: Perform EDA on Bank of England data to come up with a story to visualise. 
+
+```{r intro, echo=FALSE}
+
+setwd('/Users/bryonymiles/documents/dataprojects/eda')
+bank <-read.csv('bankdata.csv')
+
+```
+
+#1. Initial Analysis: structure of the dataset.
+
+Dimensions?
+```{r dim, echo=FALSE}
+dim(bank)
+```
+Variables?
+```{r vars, echo=FALSE}
+names(bank)
+```
+
+Field Descriptions:
+
+1. **Year**
+2. **deficit**: Central government deficit (Calendar Year Totals, £mn)
+3. **surplus**: Central government primary surplus (Calendar Year Totals, £mn)
+4. **GDP**: Real GDP at market prices (£mn, Chained Volume measure, 2013 prices)
+5. **pop**:  Population (000s)
+6. **hours**: Average weekly hours worked (hours)
+7. **unemploy**: Unemployment rate (%)
+8. **interest**: Bank of England Interest Rate (% calendar year average)
+9. **house**: House price index (Calendar year average, Jan 2015 = 100, NB uses building costs as a rough proxy prior to 1895)
+10. **exports**: Export Prices, Spliced export price deflator
+11. **imports**: Import Prices, Spliced import price deflator
+12. **oil**: oil price $ per barrel
+13. **CPI**: Headline Consumer Price Index - alternative measure that maximises use of consumer price indices and minimises use of implied consumption deflator.
+14. **inflation**: % increase in CPI since previous year
+15. **assets**: (£10mn) - total Bank of England assets - indicator of quantitative easing.
+16. **balance_sheet++** - assets as % of GDP
+17. **deficit_perc** - deficit as a % of GDP
+
+
+Structure?
+
+```{r str, echo=FALSE}
+str(bank)
+```
+
+Descriptive Stats?
+
+```{r desc, echo=FALSE}
+summary(bank)
+```
+
+#2. Further Analysis - some simple plots to looks for patterns and correlations
+
+a) Plot for each variable by year:
+
+```{r plots, echo=FALSE,message=FALSE,warning=FALSE}
+
+bank$assets <- bank$assets/1000000
+library(ggplot2)
+library(gridExtra)
+
+plotall <- function(dataframe,col) {
+g1 <- ggplot(aes(x=year,y=deficit),data = dataframe) + 
+  geom_line(color=col)
+g2 <- ggplot(aes(x=year,y=surplus),data = dataframe) + 
+  geom_line(color=col)
+g3 <- ggplot(aes(x=year,y=GDP),data = dataframe) + 
+  geom_line(color=col)
+g4 <- ggplot(aes(x=year,y=pop),data = dataframe) + 
+  geom_line(color=col)
+g5 <- ggplot(aes(x=year,y=hours),data = dataframe) + 
+  geom_line(color=col)
+g6 <- ggplot(aes(x=year,y=unemploy),data = dataframe) + 
+  geom_line(color=col)
+g7 <- ggplot(aes(x=year,y=interest),data = dataframe) + 
+  geom_line(color=col)
+g8 <- ggplot(aes(x=year,y=house),data = dataframe) + 
+  geom_line(color=col)
+g9 <- ggplot(aes(x=year,y=oil),data = dataframe) + 
+  geom_line(color=col)
+g10 <- ggplot(aes(x=year,y=CPI),data = dataframe) + 
+  geom_line(color=col)
+g11 <- ggplot(aes(x=year,y=inflation),data = dataframe) + 
+  geom_line(color=col)
+g12 <- ggplot(aes(x=year,y=exports),data = dataframe) + 
+  geom_line(color=col)
+g13 <- ggplot(aes(x=year,y=imports),data = dataframe) + 
+  geom_line(color=col)
+g14 <- ggplot(aes(x=year,y=assets),data = dataframe) + 
+  geom_line(color=col)
+
+grid.arrange(g1,g2,g3,g4,g5,g6,g7,g8,g9,g10,g11,g12,g13,g14)
+}
+
+plotnew <- function(dataframe,col) {
+g1 <- ggplot(aes(x=year,y=deficit),data = dataframe) + 
+  geom_line(color=col)
+g2 <- ggplot(aes(x=year,y=GDP),data = dataframe) + 
+  geom_line(color=col)
+g3 <- ggplot(aes(x=year,y=pop),data = dataframe) + 
+  geom_line(color=col)
+g4 <- ggplot(aes(x=year,y=unemploy),data = dataframe) + 
+  geom_line(color=col)
+g5 <- ggplot(aes(x=year,y=interest),data = dataframe) + 
+  geom_line(color=col)
+g6 <- ggplot(aes(x=year,y=house),data = dataframe) + 
+  geom_line(color=col)
+g7 <- ggplot(aes(x=year,y=oil),data = dataframe) + 
+  geom_line(color=col)
+g8 <- ggplot(aes(x=year,y=inflation),data = dataframe) + 
+  geom_line(color=col)
+g9 <- ggplot(aes(x=year,y=assets),data = dataframe) + 
+  geom_line(color=col)
+
+grid.arrange(g1,g2,g3,g4,g5,g6,g7,g8,g9)
+}
+
+plothist <- function(dataframe,col) {
+g1 <- qplot(data = dataframe, bins=20, x = deficit,xlab = 'deficit') 
+g2 <- qplot(data = dataframe, bins=20, x = surplus,xlab = 'surplus') 
+g3 <- qplot(data = dataframe, bins=20, x = GDP,xlab = 'GDP') 
+
+g4 <- qplot(data = dataframe, bins=20, x = pop,xlab = 'Population')
+g5 <- qplot(data = dataframe, bins=20, x = hours,xlab = 'Hours Worked')
+g6 <- qplot(data = dataframe, bins=20, x = unemploy,xlab = 'Unemployment')
+g7 <- qplot(data = dataframe, bins=20, x = interest,xlab = 'Interest rate')
+g8 <- qplot(data = dataframe, bins=20, x = house,xlab = 'House Price Index')
+g9 <- qplot(data = dataframe, bins=20, x = oil,xlab = 'Oil Price')
+g10 <- qplot(data = dataframe, bins=20, x = CPI,xlab = 'CPI')
+g11 <- qplot(data = dataframe, bins=20, x = inflation,xlab = 'Inflation')
+g12 <- qplot(data = dataframe, bins=20, x = exports,xlab = 'exports')
+g13 <- qplot(data = dataframe, bins=20, x = imports,xlab = 'Imports')
+g14 <- qplot(data = dataframe, bins=20, x = assets,xlab = 'Assets')
+
+grid.arrange(g1,g2,g3,g4,g5,g6,g7,g8,g9,g10,g11,g12,g13)
+}
+
+plotall(bank,'black')
+```
+
+b) Looks like most of the action is after 1900?
+
+```{r 1900plots, echo=FALSE,message=FALSE,warning=FALSE}
+bank1900 <-  subset(bank , year > 1900)
+plotall(bank1900,'green')
+```
+
+c) How about the last 10 years?
+
+```{r 1995plots, echo=FALSE,message=FALSE,warning=FALSE}
+bank1900 <-  subset(bank , year > 1995)
+plotall(bank1900,'blue')
+```
+
+d) And lastly, histograms:
+
+```{r histplots, echo=FALSE,message=FALSE,warning=FALSE}
+plothist(bank)
+```
+
+Observations at this stage:
+
+* For all variables except inflation, levels seem to be constant, or steadily rising (population, GDP) up to 1900.
+
+After 1900 data shows patterns emerging between:
+
+* deficit and surplus
+
+* GDP, population, CPI, House prices
+
+* unemployment, exports, imports and oil follow a similar pattern but have dipped in the last couple of years
+
+* interest and inflation
+
+* hours worked is not comparable with the other variables
+
+#3. What is my data story
+
+I decided it would be interesting to see how key data fields behaved in years where major economic events had occured.  
+
+I found a list of major economic events on Wikipedia ([see chart at bottom of this page](https://en.wikipedia.org/wiki/Stock_market_crash))
+
+Then I cut down my variables removing the following for the time being:
+
+* Surplus - as it's strongly linked to deficit
+* Hours, Imports, Exports, Oil, House Price, CPI,Population, Unemployment - not directly linked, dependent on other factors
+
+I then plotted a few graphs looking at my new paired down data and a few events, multiplying interest and inflation and dividing GDP for comparison.
+
+```{r crashplots, echo=FALSE,message=FALSE,warning=FALSE}
+newbank <- bank[c("deficit","year", "assets", "GDP","interest","inflation")] 
+
+write.csv(newbank, file = "new_bank.csv")
+ 
+ ggplot(newbank, aes(x = year)) + 
+  geom_line(aes(y = (deficit-(deficit*2)),colour='deficit(+)')) + scale_x_continuous(limits = c(1700, 2015)) +
+  geom_line(aes(y = GDP/12,colour='GDP/12')) + 
+    geom_line(aes(y = interest*3000,colour='interest*3000')) + 
+    geom_line(aes(y = inflation*500,colour='inflation*500')) +
+   geom_line(aes(y = assets/4,colour='assets/4')) +
+  ylab(label="deficit") + 
+  xlab("All of Them")
+ 
+
+ggplot(newbank, aes(x = year)) + 
+  geom_line(aes(y = (deficit-(deficit*2)),colour='deficit(+)')) + scale_x_continuous(limits = c(1700, 1800),breaks = c(1700,1720,1750,1792)) +
+  geom_line(aes(y = GDP/12,colour='GDP/12')) + 
+    geom_line(aes(y = interest*3000,colour='interest*3000')) + 
+    geom_line(aes(y = inflation*500,colour='inflation*500')) +
+   geom_line(aes(y = assets,colour='assets')) +
+  ylab(label="deficit") + 
+  xlab("1720 South Sea Bubble, Panic of 1792")
+
+
+ggplot(newbank, aes(x = year)) + 
+  geom_line(aes(y = (deficit-(deficit*2)),colour='deficit(+)')) +
+  scale_x_continuous(limits = c(1800, 1850),breaks = c(1800,1825,1837,1847)) + 
+  geom_line(aes(y = GDP/12,colour='GDP/12')) + 
+    geom_line(aes(y = interest*3000,colour='interest*3000')) + 
+    geom_line(aes(y = inflation*500,colour='inflation*500')) + 
+  ylab(label="deficit") + 
+  xlab("Panic of 1819, 1825, 1837 and 1847")
+
+ggplot(newbank, aes(x = year)) + 
+  geom_line(aes(y = (deficit-(deficit*2)),colour='deficit(+)')) +
+  scale_x_continuous(limits = c(1990, 2015),breaks = c(1800,1825,1837,1847)) + 
+  geom_line(aes(y = GDP/12,colour='GDP/12')) + 
+    geom_line(aes(y = interest*3000,colour='interest*3000')) + 
+    geom_line(aes(y = inflation*500,colour='inflation*500')) + 
+  ylab(label="deficit") + 
+  xlab("1990-2015")
+
+
+
+```
+
+
+#4. The Data Story
+
+It looks like inflation, interest and GDP are  most responsive to economic events.
+
+*My story* From 1720 to date, how has inflation, interest and GDP behaved before and after major economic events.  
+
+New table dimensions:
+
+1.  Crash Year
+2.  Description
+3.  Average Inflation 5 years before
+4.  Average Inflation 5 years after
+5.  Average Interest 5 years before
+6.  Average Interest 5 years after
+7.  Average GDP 5 years before
+8.  Average GDP 5 years after 
+9.  Deficit as a % of GDP
+10.  Assets as a % of GDP
+
+At this stage, I started a python file to create the average value fields and scale my variables from lowest(0) to highest(100) so that I could display them on the same x/y axes.  
+
+As the main purpose of this exercise was to embed D3.js skills I decided to have a quick look at correlations and stop the analysis here. 
+
+Maybe something to come back to at a later date?  
+
+```{r newbank_withcrashes, echo=FALSE,message=FALSE,warning=FALSE}
+setwd('/Users/bryonymiles/documents/dataprojects/eda')
+new_crashes <-read.csv('bank_final.csv')
+
+
+summary(new_crashes)
+
+
+ggplot(new_crashes, aes(x = year)) + 
+  scale_x_continuous(limits = c(1700, 2015)) +
+    geom_line(aes(y = int_before,colour='int_before')) + 
+      geom_line(aes(y = int_after,colour='int_after')) + 
+  ylab(label="interest rate") + 
+  xlab("Just Interest")
+ 
+ggplot(new_crashes, aes(x = year)) + 
+  scale_x_continuous(limits = c(1700, 2015)) +
+    geom_line(aes(y = inf_before,colour='inf_before')) + 
+      geom_line(aes(y = inf_after,colour='inf_after')) + 
+  ylab(label="inflation rate") + 
+  xlab("Just Inflation")
+
+ggplot(new_crashes, aes(x = year)) + 
+  scale_x_continuous(limits = c(1700, 2015)) +
+    geom_line(aes(y = GDP_before,colour='GDP_before')) + 
+      geom_line(aes(y = GDP_after,colour='GDP_after')) + 
+  ylab(label="£ mn") + 
+  xlab("Just GDP")
+
+ggplot(new_crashes, aes(x = year)) + 
+  scale_x_continuous(limits = c(1700, 2015)) +
+    geom_line(aes(y = inf_before_scale,colour='inf_before scaled')) + 
+      geom_line(aes(y = inf_after_scale,colour='inf_after scaled')) + 
+    geom_line(aes(y = int_before_scale,colour='int_before scale')) + 
+      geom_line(aes(y = int_after_scale,colour='int_after scaled')) + 
+    geom_line(aes(y = GDP_before_scale,colour='GDP_before scaled')) + 
+      geom_line(aes(y = GDP_after_scale,colour='GDP_after scaled')) + 
+  ylab(label="lowest to highest") + 
+  xlab("Inflation, Interest and GDP change scaled lowest(0) to highest(100)")
+```
